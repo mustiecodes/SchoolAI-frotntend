@@ -1,5 +1,6 @@
 "use client";
 
+import GradeLevel from "@/components/grade_level";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -36,14 +37,7 @@ export default function AcademicContentForm() {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Grade Level */}
-          <div>
-            <label className="block font-semibold">Grade level: *</label>
-            <select {...register("gradeLevel")} className="w-full p-2 border rounded">
-              <option value="University">University</option>
-              <option value="Secondary School">Secondary School</option>
-              <option value="Primary School">Primary School</option>
-            </select>
-          </div>
+          <GradeLevel/>
 
           {/* Content Type */}
           <div>
