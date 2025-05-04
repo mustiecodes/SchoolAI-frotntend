@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,13 +19,27 @@ export default function SignupPage() {
     firstName: "",
     lastName: "",
   });
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
+
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, [router]);
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
 
     const { email, password, confirmPassword, firstName, lastName } = form;
 
@@ -38,16 +54,23 @@ export default function SignupPage() {
     }
 
     try {
-      setLoading(true);
-
-      const res = await axios.post("/api/v1/register", {
+      const response = await axios.post<any>("/api/v1/register", {
         email,
         password,
         first_name: firstName,
         last_name: lastName,
       });
 
+      const { token } = response.data;
+
+      localStorage.setItem("authToken", token);
+
+      setSuccess("Login successful! Redirecting...");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
       toast.success("Account created successfully!");
+
       setForm({
         email: "",
         password: "",
@@ -56,7 +79,10 @@ export default function SignupPage() {
         lastName: "",
       });
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Signup failed");
+      console.error("Signup error:", err); // For debugging
+
+      const message = err?.response?.data?.error || "Signup failed";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -66,10 +92,17 @@ export default function SignupPage() {
     <div className="flex items-center justify-center min-h-screen bg-[#000511] px-4">
       <div className="w-full max-w-md p-8 border rounded-lg shadow-lg">
         <div className="flex justify-center">
-          <Image src="/images/SCHOOL AI 1.jpg" alt="Magic School" width={180} height={80} />
+          <Image
+            src="/images/SCHOOL AI 1.jpg"
+            alt="Magic School"
+            width={180}
+            height={80}
+          />
         </div>
 
-        <h2 className="text-xl font-semibold text-center text-white mt-4">Sign Up</h2>
+        <h2 className="text-xl font-semibold text-center text-white mt-4">
+          Sign Up
+        </h2>
 
         <form onSubmit={handleSignup} className="mt-6 space-y-4">
           <input
@@ -117,7 +150,11 @@ export default function SignupPage() {
               className="absolute right-3 top-3 text-gray-500"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+              {showPassword ? (
+                <EyeSlashIcon className="w-5 h-5" />
+              ) : (
+                <EyeIcon className="w-5 h-5" />
+              )}
             </button>
           </div>
 
@@ -136,7 +173,11 @@ export default function SignupPage() {
               className="absolute right-3 top-3 text-gray-500"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+              {showPassword ? (
+                <EyeSlashIcon className="w-5 h-5" />
+              ) : (
+                <EyeIcon className="w-5 h-5" />
+              )}
             </button>
           </div>
 
@@ -151,13 +192,21 @@ export default function SignupPage() {
 
         <p className="text-left text-sm mt-4 text-white">
           By continuing, you consent to the{" "}
-          <a href="#" className="text-blue-500 hover:underline">privacy policy</a> and{" "}
-          <a href="#" className="text-blue-500 hover:underline">terms of service</a>.
+          <a href="#" className="text-blue-500 hover:underline">
+            privacy policy
+          </a>{" "}
+          and{" "}
+          <a href="#" className="text-blue-500 hover:underline">
+            terms of service
+          </a>
+          .
         </p>
 
         <div className="flex justify-between mt-4 text-sm text-white">
           <span>Already have an account?</span>
-          <Link href="/signin" className="text-blue-500 hover:underline">Sign In</Link>
+          <Link href="/signin" className="text-blue-500 hover:underline">
+            Sign In
+          </Link>
         </div>
       </div>
     </div>
