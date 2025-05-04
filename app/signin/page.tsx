@@ -9,6 +9,9 @@ import { useRouter } from "next/navigation";
 
 // API response type
 interface LoginResponse {
+  email: string;
+  first_name: string;
+  last_name: string;
   token: string;
 }
 
@@ -24,11 +27,12 @@ export default function SignInPage() {
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      router.push("/dashboard");
-    }
-  }, [router]);
+    // const token = localStorage.getItem("authToken");
+    // console.log(token);
+    // // if (token) {
+    // //   router.push("/dashboard");
+    // // }
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -37,14 +41,19 @@ export default function SignInPage() {
     setSuccess("");
 
     try {
-      const response = await axios.post<LoginResponse>("/api/v1/login", {
+      const response = await axios.post<any>("/api/v1/login", {
         email,
         password,
       });
 
-      const { token } = response.data;
-      
+      const { data } = response.data;
+
+      console.log(data.email);
+
+      const { token } = data;
+
       localStorage.setItem("authToken", token);
+      
       setSuccess("Login successful! Redirecting...");
       setTimeout(() => {
         router.push("/dashboard");
