@@ -44,6 +44,7 @@ export default function AcademicContentForm() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setLoading(true);
     setError(null);
+    setResponse(null); // ✅ Clear previous response before fetching new one
 
     const formDataToSend = new FormData();
     formDataToSend.append("grade_level", data.gradeLevel);
@@ -53,7 +54,6 @@ export default function AcademicContentForm() {
     formDataToSend.append("standard_objective", data.standardObjective);
     formDataToSend.append("additional_criteria", data.additionalCriteria || "");
 
-    // ✅ Append multiple files as uploaded_content[]
     if (data.uploadedContent && data.uploadedContent.length > 0) {
       data.uploadedContent.forEach((file) => {
         formDataToSend.append("uploaded_content[]", file);
@@ -165,7 +165,6 @@ export default function AcademicContentForm() {
             )}
           </div>
 
-          {/* Uploadable Textarea handles both additionalCriteria and uploadedContent */}
           <UploadableTextarea setValue={setValue} />
 
           <div className="text-center">

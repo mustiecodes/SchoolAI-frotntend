@@ -1,4 +1,3 @@
-// components/TypingMarkdown.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -12,9 +11,13 @@ interface TypingMarkdownProps {
 
 const TypingMarkdown: React.FC<TypingMarkdownProps> = ({ content, delay = 40 }) => {
   const [displayedText, setDisplayedText] = useState('');
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
+    // Reset everything when new content comes in
+    setDisplayedText('');
+    setIsDone(false);
+
     const words = content.split(/(\s+)/); // keep spaces
     let current = 0;
 
@@ -22,18 +25,22 @@ const TypingMarkdown: React.FC<TypingMarkdownProps> = ({ content, delay = 40 }) 
       if (current < words.length) {
         setDisplayedText((prev) => prev + words[current]);
         current++;
-        setCurrentIndex(current);
       } else {
         clearInterval(interval);
+        setIsDone(true);
       }
     }, delay);
 
     return () => clearInterval(interval);
-  }, [content, delay]);
+  }, [content, delay]); // re-run on content change
 
   return (
-    <div className="prose max-w-none">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayedText}</ReactMarkdown>
+    <div className="prose prose-purple max-w-none">
+      {isDone ? (
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      ) : (
+        <pre className="whitespace-pre-wrap text-gray-700">{displayedText}</pre>
+      )}
     </div>
   );
 };

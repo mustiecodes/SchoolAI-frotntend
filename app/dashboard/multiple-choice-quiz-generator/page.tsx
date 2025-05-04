@@ -73,7 +73,7 @@ export default function MultipleChoiceQuizGenerator() {
           </div>
 
           {/* Additional Criteria */}
-          <UploadableTextarea></UploadableTextarea>
+          {/* <UploadableTextarea></UploadableTextarea> */}
 
           {/* Submit Button */}
           <div className="text-center">
