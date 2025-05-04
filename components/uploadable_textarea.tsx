@@ -16,7 +16,7 @@ interface UploadableTextareaProps {
   setValue: (name: keyof FormData, value: any) => void;
 }
 
-export default function UploadableTextarea({ setValue }: UploadableTextareaProps) {
+export default function UploadableTextarea({ setValue }: any) {
   const [text, setText] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
 

@@ -1,13 +1,13 @@
 "use client";
 
-import GradeLevel from "@/components/grade_level";
 import UploadableTextarea from "@/components/uploadable_textarea";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm, SubmitHandler, SubmitErrorHandler } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import ContentDisplay from "@/components/content-display";
+import ContentDisplay from "@/components/content_display";
+import GradeLevel from "@/components/grade_level";
 
 interface FormData {
   gradeLevel: string;
@@ -32,6 +32,7 @@ export default function AcademicContentForm() {
   } = useForm<FormData>();
 
   const [response, setResponse] = useState<any>(null);
+  const [gradeLevel, setGradeLevel] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -80,8 +81,8 @@ export default function AcademicContentForm() {
       console.error("Error generating content:", error);
       setError(
         error.response?.data?.error ||
-        error.message ||
-        "Something went wrong. Please try again."
+          error.message ||
+          "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -103,12 +104,12 @@ export default function AcademicContentForm() {
       <div className="max-w-2xl mx-auto bg-white shadow-md p-6 rounded-lg">
         <h2 className="text-xl font-bold text-center">Academic Content</h2>
         <p className="text-center text-gray-600 mb-4">
-          Generate original academic content customized to the criteria of your choice.
+          Generate original academic content customized to the criteria of your
+          choice.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
-          <GradeLevel />
-
+          <GradeLevel></GradeLevel>
           <div>
             <label className="block font-semibold">Content Type: *</label>
             <textarea
@@ -119,7 +120,9 @@ export default function AcademicContentForm() {
               placeholder="Short Story, Procedural Text, Persuasive, News Article, Textbook Page"
             />
             {errors.contentType && (
-              <p className="text-red-500 text-sm">{errors.contentType.message}</p>
+              <p className="text-red-500 text-sm">
+                {errors.contentType.message}
+              </p>
             )}
           </div>
 
@@ -133,7 +136,9 @@ export default function AcademicContentForm() {
               placeholder="1 page, Exactly 1 paragraph, 2 pages, 3 pages"
             />
             {errors.textLength && (
-              <p className="text-red-500 text-sm">{errors.textLength.message}</p>
+              <p className="text-red-500 text-sm">
+                {errors.textLength.message}
+              </p>
             )}
           </div>
 

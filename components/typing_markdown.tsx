@@ -1,21 +1,25 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import React, { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface TypingMarkdownProps {
   content: string;
   delay?: number; // milliseconds between words
 }
 
-const TypingMarkdown: React.FC<TypingMarkdownProps> = ({ content, delay = 40 }) => {
-  const [displayedText, setDisplayedText] = useState('');
+const TypingMarkdown: React.FC<TypingMarkdownProps> = ({
+  content,
+  delay = 40,
+}) => {
+  const [displayedText, setDisplayedText] = useState("");
   const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
-    // Reset everything when new content comes in
-    setDisplayedText('');
+    if (typeof content !== "string" || content.trim() === "") return;
+
+    setDisplayedText("");
     setIsDone(false);
 
     const words = content.split(/(\s+)/); // keep spaces
@@ -32,7 +36,7 @@ const TypingMarkdown: React.FC<TypingMarkdownProps> = ({ content, delay = 40 }) 
     }, delay);
 
     return () => clearInterval(interval);
-  }, [content, delay]); // re-run on content change
+  }, [content, delay]);
 
   return (
     <div className="prose prose-purple max-w-none">
