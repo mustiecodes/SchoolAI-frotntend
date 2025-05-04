@@ -6,9 +6,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-export default function AcademicContentForm() {
+export default function MultipleChoiceQuizGenerator() {
   const { register, handleSubmit } = useForm();
   const [formData, setFormData] = useState(null);
+  const [gradeLevel, setGradeLevel] = useState("University");
+  const [slides, setSlides] = useState(5);
+  const [topic, setTopic] = useState("");
+  const [criteria, setCriteria] = useState("");
 
   const onSubmit = (data: any) => {
     setFormData(data);
@@ -21,52 +25,51 @@ export default function AcademicContentForm() {
       <div className="mb-4">
         <button className="text-purple-600 font-semibold">
           <Link href={"/dashboard"}> &larr; Back </Link>
-          </button>
+        </button>
       </div>
 
       {/* Form Container */}
       <div className="max-w-2xl mx-auto bg-white shadow-md p-6 rounded-lg">
-        <h2 className="text-xl font-bold text-center">Academic Content</h2>
+        <h2 className="text-xl font-bold text-center">
+          Multiple Choice Quiz / Assessment
+        </h2>
         <p className="text-center text-gray-600 mb-4">
-          Generate original academic content customized to the criteria of your choice.
+          Create a multiple choice assessment, quiz, or test based on any topic,
+          standard(s), or criteria!
         </p>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          
           {/* Grade Level */}
-          <GradeLevel/>
+          <GradeLevel />
 
           {/* Content Type */}
           <div>
-            <label className="block font-semibold">Content Type: *</label>
-            <textarea
-              {...register("contentType")}
-              className="w-full p-2 border rounded"
-              placeholder="Short Story, Procedural Text, Persuasive, News Article, Textbook Page"
-            ></textarea>
+            <label className="block font-semibold">
+              Number of Questions: *
+            </label>
+            <input
+              type="number"
+              className="w-full p-2 border rounded-md"
+              min="1"
+              value={slides}
+              onChange={(e) => setSlides(Number(e.target.value))}
+            />
           </div>
 
-          {/* Text Length */}
-          <div>
-            <label className="block font-semibold">Text Length: *</label>
-            <textarea
-              {...register("textLength")}
-              className="w-full p-2 border rounded"
-              placeholder="1 page, Exactly 1 paragraph, 2 pages, 3 pages"
-            ></textarea>
-          </div>
-
-          {/* Topic, Standard, Objective */}
+          {/* Topic, Standard, Content */}
           <div>
             <label className="block font-semibold">
-              Topic, standard, objective (be as specific as possible): *
+              Topic, Standard, Content, or Objective: *
             </label>
             <textarea
-              {...register("topic")}
-              className="w-full p-2 border rounded"
-              placeholder="The process of mitosis, the story of Jack and the Beanstalk but set in a Minecraft world..."
-            ></textarea>
+              {...register("textLength")}
+              className="w-full p-2 border rounded-md"
+              rows={3}
+              placeholder="Enter topic details..."
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+            />
           </div>
 
           {/* Additional Criteria */}
@@ -74,7 +77,10 @@ export default function AcademicContentForm() {
 
           {/* Submit Button */}
           <div className="text-center">
-            <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded">
+            <button
+              type="submit"
+              className="bg-purple-600 text-white px-4 py-2 rounded"
+            >
               Generate
             </button>
           </div>

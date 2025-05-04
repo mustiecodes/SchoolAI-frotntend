@@ -1,41 +1,116 @@
-"use client"; // Since we have interactivity (state, onClick)
+"use client";
 
 import Image from "next/image";
-import { useState } from "react";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useState } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { email, password, confirmPassword, firstName, lastName } = form;
+
+    if (!email || !password || !confirmPassword || !firstName || !lastName) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await axios.post("/api/v1/register", {
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+      });
+
+      toast.success("Account created successfully!");
+      setForm({
+        email: "",
+        password: "",
+        confirmPassword: "",
+        firstName: "",
+        lastName: "",
+      });
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#000511]">
-      <div className="w-full max-w-md p-8 border-[1px] rounded-lg shadow-lg">
-        {/* Logo */}
+    <div className="flex items-center justify-center min-h-screen bg-[#000511] px-4">
+      <div className="w-full max-w-md p-8 border rounded-lg shadow-lg">
         <div className="flex justify-center">
           <Image src="/images/SCHOOL AI 1.jpg" alt="Magic School" width={180} height={80} />
         </div>
 
-        {/* Sign-in Heading */}
         <h2 className="text-xl font-semibold text-center text-white mt-4">Sign Up</h2>
 
-        {/* Form */}
-        <form className="mt-6">
-          {/* Email Field */}
-          <div className="mb-4">
-            <input
-              type="email"
-              placeholder="Email address"
-              className="w-full px-4 py-2 text-white border rounded-lg focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
+        <form onSubmit={handleSignup} className="mt-6 space-y-4">
+          <input
+            name="firstName"
+            type="text"
+            placeholder="First Name"
+            value={form.firstName}
+            onChange={handleChange}
+            className="w-full px-4 py-2 text-white border rounded-lg focus:ring-2 focus:ring-purple-500 bg-transparent"
+            required
+          />
 
-          {/* Password Field */}
-          <div className="mb-4 relative">
+          <input
+            name="lastName"
+            type="text"
+            placeholder="Last Name"
+            value={form.lastName}
+            onChange={handleChange}
+            className="w-full px-4 py-2 text-white border rounded-lg focus:ring-2 focus:ring-purple-500 bg-transparent"
+            required
+          />
+
+          <input
+            name="email"
+            type="email"
+            placeholder="Email address"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full px-4 py-2 text-white border rounded-lg focus:ring-2 focus:ring-purple-500 bg-transparent"
+            required
+          />
+
+          <div className="relative">
             <input
+              name="password"
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 text-white"
+              value={form.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 text-white bg-transparent"
+              required
             />
             <button
               type="button"
@@ -46,12 +121,15 @@ export default function SignupPage() {
             </button>
           </div>
 
-           {/* Confirm Password Field */}
-           <div className="mb-4 relative">
+          <div className="relative">
             <input
+              name="confirmPassword"
               type={showPassword ? "text" : "password"}
               placeholder="Confirm Password"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 text-white"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 text-white bg-transparent"
+              required
             />
             <button
               type="button"
@@ -62,43 +140,24 @@ export default function SignupPage() {
             </button>
           </div>
 
-          {/* Sign-in Button */}
-          <button className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">
-            Sign Up
+          <button
+            type="submit"
+            className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700"
+            disabled={loading}
+          >
+            {loading ? "Signing up..." : "Sign Up"}
           </button>
         </form>
 
-        {/* Social Sign-in Buttons */}
-        {/* <div className="mt-4">
-          <button className="w-full border py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100">
-            <span>🔵</span> Sign in with Google
-          </button>
-          <button className="w-full mt-2 border py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100">
-            <span>🟢</span> Sign in with Microsoft
-          </button>
-          <button className="w-full mt-2 border py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100">
-            <span>✨</span> Sign in with SSO
-          </button>
-        </div> */}
-
-        {/* Privacy Policy & Links */}
-        <p className="text-left text-sm mt-4">
+        <p className="text-left text-sm mt-4 text-white">
           By continuing, you consent to the{" "}
-          <a href="#" className="text-blue-500 hover:underline">
-            privacy policy
-          </a>{" "}
-          and{" "}
-          <a href="#" className="text-blue-500 hover:underline">
-            terms of service.
-          </a>
+          <a href="#" className="text-blue-500 hover:underline">privacy policy</a> and{" "}
+          <a href="#" className="text-blue-500 hover:underline">terms of service</a>.
         </p>
 
-        {/* Account & Password Links */}
-        <div className="flex justify-between mt-4 text-sm">
-        <span className="text-white">Already have an account?</span>
-          <span className="text-blue-500 hover:underline">
-            <Link href={"/signin"}>Sign In</Link>
-          </span>
+        <div className="flex justify-between mt-4 text-sm text-white">
+          <span>Already have an account?</span>
+          <Link href="/signin" className="text-blue-500 hover:underline">Sign In</Link>
         </div>
       </div>
     </div>

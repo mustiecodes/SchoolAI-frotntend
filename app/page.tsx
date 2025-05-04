@@ -18,7 +18,7 @@ export default function SchoolAIPage() {
     <div className="min-h-screen bg-[#000511] from-purple-600 to-purple-800 text-white p-6">
       {/* Hero Section */}
       <section className="text-center py-16">
-      <Image className="mx-auto mb-[30px]" src="/images/saii.png" alt="Logo" width={300} height={200} />
+      <Image className="mx-auto mb-[30px]" src="/images/sai.png" alt="Logo" width={300} height={200} />
         <motion.h1
           className="text-5xl font-bold"
           initial={{ opacity: 0, y: -50 }}
