@@ -5,7 +5,6 @@ import axios from "axios";
 import UploadableTextarea from "@/components/uploadable_textarea";
 import { useForm, SubmitHandler, SubmitErrorHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import ContentDisplay from "@/components/content_display";
 import GradeLevel from "@/components/grade_level";
 
 interface FormData {
@@ -17,9 +16,23 @@ interface FormData {
   uploadedContent: File[];
 }
 
-interface ApiResponse {
-  content: string;
-  generated_at: string;
+interface PresentationDetails {
+  presentation_title: string;
+  presentation_subtitle: string;
+  image_search: string;
+  slides: {
+    title: string;
+    subtitle: string;
+    image_search: string;
+    content: { title: string; description: string }[];
+  }[];
+}
+
+interface PresentationResponse {
+  presentation_url: string;
+  ppt_id: string;
+  pdf_url: string;
+  presentation_details: PresentationDetails;
 }
 
 export default function PresentationGeneratorPage() {
@@ -30,7 +43,7 @@ export default function PresentationGeneratorPage() {
     formState: { errors },
   } = useForm<FormData>();
 
-  const [response, setResponse] = useState<ApiResponse | null>(null);
+  const [presentation, setPresentation] = useState<PresentationResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -43,7 +56,7 @@ export default function PresentationGeneratorPage() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setLoading(true);
     setError(null);
-    setResponse(null);
+    setPresentation(null);
 
     const formData = new FormData();
     formData.append("grade_level", data.gradeLevel);
@@ -52,7 +65,7 @@ export default function PresentationGeneratorPage() {
     formData.append("standard_objective", data.standardObjective);
     formData.append("additional_criteria", data.additionalCriteria || "");
 
-    if (data.uploadedContent && data.uploadedContent.length > 0) {
+    if (data.uploadedContent?.length) {
       data.uploadedContent.forEach((file) => {
         formData.append("uploaded_content", file);
       });
@@ -64,17 +77,14 @@ export default function PresentationGeneratorPage() {
 
     try {
       if (token) {
-        const res = await axios.post<any>(
-          "/api/v1/presentation-gen",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setResponse(res.data.data);
+        const res = await axios.post<any>("/api/v1/presentation-gen", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const parsed: PresentationResponse = JSON.parse(res.data.data.content);
+        setPresentation(parsed);
       } else {
         router.push("/signin");
       }
@@ -95,20 +105,17 @@ export default function PresentationGeneratorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#000511] p-6">
+    <div className="min-h-screen bg-[#000511] p-6 text-white">
       <div className="mb-4">
         <button className="text-purple-600 font-semibold">
           <a href="/dashboard"> &larr; Back </a>
         </button>
       </div>
 
-      <div className="max-w-2xl mx-auto bg-white shadow-md p-6 rounded-lg">
-        <h2 className="text-xl font-bold text-center">
-          Presentation Generator
-        </h2>
+      <div className="max-w-2xl mx-auto bg-white text-black shadow-md p-6 rounded-lg">
+        <h2 className="text-xl font-bold text-center mb-2">Presentation Generator</h2>
         <p className="text-center text-gray-600 mb-4">
-          Generate exportable slides based on a topic, text, YouTube video, or
-          uploaded content.
+          Generate exportable slides based on a topic, text, YouTube video, or uploaded content.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
@@ -126,9 +133,7 @@ export default function PresentationGeneratorPage() {
               min="1"
             />
             {errors.numberOfSlides && (
-              <p className="text-red-500 text-sm">
-                {errors.numberOfSlides.message}
-              </p>
+              <p className="text-red-500 text-sm">{errors.numberOfSlides.message}</p>
             )}
           </div>
 
@@ -139,9 +144,7 @@ export default function PresentationGeneratorPage() {
               className="w-full p-2 border rounded"
               placeholder="The process of mitosis, the story of Jack and the Beanstalk but set in a Minecraft world..."
             />
-            {errors.topic && (
-              <p className="text-red-500 text-sm">{errors.topic.message}</p>
-            )}
+            {errors.topic && <p className="text-red-500 text-sm">{errors.topic.message}</p>}
           </div>
 
           <div>
@@ -154,9 +157,7 @@ export default function PresentationGeneratorPage() {
               placeholder="The educational goal for the content, e.g., Understanding mitosis process"
             />
             {errors.standardObjective && (
-              <p className="text-red-500 text-sm">
-                {errors.standardObjective.message}
-              </p>
+              <p className="text-red-500 text-sm">{errors.standardObjective.message}</p>
             )}
           </div>
 
@@ -172,23 +173,64 @@ export default function PresentationGeneratorPage() {
             </button>
           </div>
         </form>
-
-        {response && (
-          <div className="mt-6 p-4 bg-gray-100 rounded-md">
-            <ContentDisplay
-              content={response.content}
-              generatedAt={response.generated_at}
-            />
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-6 p-4 bg-red-100 rounded-md">
-            <h3 className="font-semibold text-lg text-red-600">Error:</h3>
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
       </div>
+
+      {presentation && (
+        <div className="mt-12 max-w-5xl mx-auto bg-white text-black p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-2">
+            {presentation.presentation_details.presentation_title}
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {presentation.presentation_details.presentation_subtitle}
+          </p>
+
+          <div className="mb-6">
+            <a
+              href={presentation.presentation_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline mr-4"
+            >
+              Download PPT
+            </a>
+            <a
+              href={presentation.pdf_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              View PDF
+            </a>
+          </div>
+
+          {presentation.presentation_details.slides.map((slide, index) => (
+            <div key={index} className="mb-8 border-b pb-6">
+              <h3 className="text-xl font-semibold">{slide.title}</h3>
+              <p className="text-sm text-gray-600 mb-2">{slide.subtitle}</p>
+              {slide.image_search && (
+                <img
+                  src={slide.image_search}
+                  alt={`Slide ${index + 1}`}
+                  className="w-full rounded-md h-64 object-cover mb-4"
+                />
+              )}
+              <ul className="list-disc list-inside space-y-1">
+                {slide.content.map((item, idx) => (
+                  <li key={idx}>
+                    <strong>{item.title}: </strong>
+                    {item.description}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {loading && (
+        <p className="text-center text-white mt-6">⏳ Generating your presentation...</p>
+      )}
+      {error && <p className="text-center text-red-500 mt-6">{error}</p>}
     </div>
   );
 }
